@@ -51,17 +51,37 @@ function Article(props) {
   );
 };
 
+//----------------Create 컴포넌트---------------------------
+function Create(props) {
+  return (
+    <article>
+      <h2>create</h2>
+      <form onSubmit={e => {
+        e.preventDefault();
+        const title = e.target.title.value;
+        const body = e.target.body.value;
+        props.onCreate(title, body);
+      }}>
+        <p><input type='text' name='title' placeholder='title 입력'></input></p>
+        <p><textarea name='body' placeholder='body 입력'></textarea></p>
+        <p><button type='sbumit'>Create</button></p>
+      </form>
+    </article>
+  );
+};
+
 
 
 //-----------------부모App--------------------------
 function App() {
   const [mode, setMode] = useState('WELCOME');
   const [id, setId] = useState(null);
-  const topics = [ // 정보가 여러개여서 배열로 둔다 배열 객체는 뒤에 , 그리고 키:밸류가 한 쌍
-    { id: 1, title: 'Html', body: 'Html....' },
+  const [next, setNext] = useState(4);
+  const [topics, setTopics] = useState([ // 정보가 여러개여서 배열로 둔다 배열 객체는 뒤에 , 그리고 키:밸류가 한 쌍
+    { id: 1, title: 'Html', body: 'Html....' }, // state 이후 배열에 create로 객체 추가 useState(4) 번 이후
     { id: 2, title: 'Css', body: 'Css....' },
     { id: 3, title: 'JavaScript', body: 'JavaScript....' },
-  ];
+  ]);
 
   let content = null;
   switch (mode) {
@@ -79,6 +99,19 @@ function App() {
       }
       content = <Article title={title} body={body}></Article>
       break;
+
+    case 'CREATE':
+      content = <Create onCreate={(_title, _body) => {
+        const newTopic = { id: next, title: _title, body: _body }
+        const newTopics = [...topics] // 기존 객체 복제후
+        newTopics.push(newTopic); // newTopics 배열에 newTopic 을푸쉬
+        setTopics(newTopics); // 복제한 topics를 setTopics
+
+        setMode('READ'); // 상세보기 나오게 하는방법
+        setId(next); // id를 next (4) 즉 다음에 나올 배열의 길이는 4번이 된다
+        setNext(next + 1); // 이후 state가 set으로 변할때+1 해서 계속 쌓을수 있게한다.
+      }}></Create>
+
   }
 
   return (
@@ -93,6 +126,12 @@ function App() {
 
       {/* content가 곧 Article switch 문으로 케이스마다 다른 Article이 나오게 했다 */}
       {content}
+
+      {/* create 하기 */}
+      <a href='/create' onClick={(e) => {
+        e.preventDefault(); // 기본이벤트 제거
+        setMode('CREATE'); // 클릭 이벤트 발생시 setMode 가 CREATE 로 변경
+      }}>create</a>
     </div>
   );
 }
