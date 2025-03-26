@@ -70,6 +70,31 @@ function Create(props) {
   );
 };
 
+//----------------Update 컴포넌트---------------------------
+function Update(props) {
+  const [title, setTitle] = useState(props.title);
+  const [body, setBody] = useState(props.body);
+  return (
+    <article>
+      <h2>Update</h2>
+      <form onSubmit={e => {
+        e.preventDefault();
+        const title = e.target.title.value;
+        const body = e.target.body.value;
+        props.onUpdate(title, body);
+      }}>
+        <p><input type='text' name='title' placeholder='title 입력' value={title} onChange={(e) => { // 키보드를 입력할때마다 onChange가 발생함
+          setTitle(e.target.value);
+        }}></input></p>
+        <p><textarea name='body' placeholder='body 입력' value={body} onChange={(e) => {
+          setBody(e.target.value);
+        }}></textarea></p>
+        <p><button type='sbumit'>Update</button></p>
+      </form>
+    </article>
+  );
+};
+
 
 
 //-----------------부모App--------------------------
@@ -84,6 +109,8 @@ function App() {
   ]);
 
   let content = null;
+  let contextControl = null; // read에서만 나오게 만들 변수
+
   switch (mode) {
     case 'WLECOME':
       content = <Article title="Welcome" body="Home Work ... :)"></Article>
@@ -98,6 +125,10 @@ function App() {
         }
       }
       content = <Article title={title} body={body}></Article>
+      contextControl = <li><a href={'/update' + id} onClick={(e) => {
+        e.preventDefault();
+        setMode('UPDATE');
+      }}>Update</a></li>
       break;
 
     case 'CREATE':
@@ -109,10 +140,33 @@ function App() {
 
         setMode('READ'); // 상세보기 나오게 하는방법
         setId(next); // id를 next (4) 즉 다음에 나올 배열의 길이는 4번이 된다
-        setNext(next + 1); // 이후 state가 set으로 변할때+1 해서 계속 쌓을수 있게한다.
       }}></Create>
+      break;
+  }
+
+  if (mode === 'UPDATE') {
+    let title, body = null;
+    for (let i = 0; i < topics.length; i++) {
+      if (topics[i].id === id) {
+        title = topics[i].title;
+        body = topics[i].body;
+      }
+    }
+    content = <Update title={title} body={body} onUpdate={(_title, _body) => {
+      const newTopic = [...topics]
+      const updatedTopic = { id: id, title: _title, body: _body }
+      for (let i = 0; i < newTopic.length; i++) {
+        if (newTopic[i].id === id) {
+          newTopic[i] = updatedTopic;
+          break;
+        }
+      }
+      setTopics(newTopic);
+      setMode('READ');
+    }}></Update>
 
   }
+
 
   return (
     <div>
@@ -128,10 +182,16 @@ function App() {
       {content}
 
       {/* create 하기 */}
-      <a href='/create' onClick={(e) => {
-        e.preventDefault(); // 기본이벤트 제거
-        setMode('CREATE'); // 클릭 이벤트 발생시 setMode 가 CREATE 로 변경
-      }}>create</a>
+      <ul>
+        <li>
+          <a href='/create' onClick={(e) => {
+            e.preventDefault(); // 기본이벤트 제거
+            setMode('CREATE'); // 클릭 이벤트 발생시 setMode 가 CREATE 로 변경
+          }}>create</a>
+        </li>
+        {/* Update 만들기 */}
+        {contextControl}
+      </ul>
     </div>
   );
 }
