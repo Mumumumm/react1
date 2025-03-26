@@ -5,7 +5,10 @@ import './App.css';
 function Header(props) { // 부모에게 전달 받을 매개변수
   return (
     <header>
-      <h1><a href='/'>{props.title}</a></h1>
+      <h1><a href='/' onClick={(e) => {
+        e.preventDefault();
+        props.changeMode();
+      }}>{props.title}</a></h1>
     </header>
   );
 };
@@ -20,7 +23,12 @@ function Nav(props) {
   ]
   for (let i = 0; i < props.topics_.length; i++) {
     let t = props.topics_[i];
-    lis.push(<li key={t.id}><a href={/read/ + t.id}>{t.title}</a></li >);
+    lis.push(<li key={t.id}>
+      <a id={t.id} href={/read/ + t.id} onClick={(e) => { // onClick 이벤트 만들기
+        e.preventDefault();
+        props.navMode(e.target.id);
+      }}>{t.title}</a>
+    </li >);
   }
   return (
     <nav>
@@ -54,8 +62,12 @@ function App() {
 
   return (
     <div>
-      <Header title="Header component"></Header>
-      <Nav topics_={topics}></Nav>
+      <Header title="Header component" changeMode={() => {
+        alert('Header');
+      }}></Header>
+      <Nav topics_={topics} navMode={(id) => {
+        alert(id);
+      }}></Nav>
       <Article title="Welcome" body="Home Work ... :)"></Article>
     </div>
   );
