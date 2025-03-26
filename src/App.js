@@ -1,5 +1,6 @@
 import logo from './logo.svg';
 import './App.css';
+import { useState } from 'react';
 
 //-------------------Header 컴포넌트------------------------
 function Header(props) { // 부모에게 전달 받을 매개변수
@@ -24,9 +25,9 @@ function Nav(props) {
   for (let i = 0; i < props.topics_.length; i++) {
     let t = props.topics_[i];
     lis.push(<li key={t.id}>
-      <a id={t.id} href={/read/ + t.id} onClick={(e) => { // onClick 이벤트 만들기
+      <a id={t.id} href={/read/ + t.id} onClick={(e) => { // onClick 이벤트 만들기  id={t.id} a 태그의 속성으로 t.id를 넘기면 문자열화
         e.preventDefault();
-        props.navMode(e.target.id);
+        props.navMode(Number(e.target.id)); // (Number(e.target.id)) target인 a태그의 id를 Number해서 숫자화
       }}>{t.title}</a>
     </li >);
   }
@@ -54,21 +55,44 @@ function Article(props) {
 
 //-----------------부모App--------------------------
 function App() {
+  const [mode, setMode] = useState('WELCOME');
+  const [id, setId] = useState(null);
   const topics = [ // 정보가 여러개여서 배열로 둔다 배열 객체는 뒤에 , 그리고 키:밸류가 한 쌍
     { id: 1, title: 'Html', body: 'Html....' },
     { id: 2, title: 'Css', body: 'Css....' },
     { id: 3, title: 'JavaScript', body: 'JavaScript....' },
   ];
 
+  let content = null;
+  switch (mode) {
+    case 'WLECOME':
+      content = <Article title="Welcome" body="Home Work ... :)"></Article>
+      break;
+
+    case 'READ':
+      let title, body = null;
+      for (let i = 0; i < topics.length; i++) {
+        if (topics[i].id === id) {
+          title = topics[i].title;
+          body = topics[i].body;
+        }
+      }
+      content = <Article title={title} body={body}></Article>
+      break;
+  }
+
   return (
     <div>
       <Header title="Header component" changeMode={() => {
-        alert('Header');
+        setMode("WLECOME");
       }}></Header>
-      <Nav topics_={topics} navMode={(id) => {
-        alert(id);
+      <Nav topics_={topics} navMode={(_id) => {
+        setMode('READ');
+        setId(_id);
       }}></Nav>
-      <Article title="Welcome" body="Home Work ... :)"></Article>
+
+      {/* content가 곧 Article switch 문으로 케이스마다 다른 Article이 나오게 했다 */}
+      {content}
     </div>
   );
 }
